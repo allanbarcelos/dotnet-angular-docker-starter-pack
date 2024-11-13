@@ -1,0 +1,40 @@
+services:
+  api:
+    build: 
+      context: ./Api
+    depends_on:
+      - postgres
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=ProdDB;Username=postgres;Password=YourStrong@Passw0rd;Port=5432
+      - JwtSettings__Key=VPURxn6oujAe7wDfqKQ4bG1VWGF9bcLwoDKGUX
+      - JwtSettings__Issuer=Api
+      - JwtSettings__Audience=ApiUsers
+      - JwtSettings__ExpirationMinutes=30
+    networks:
+      - docker-dotnet-reactjs
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=ProdDB
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=YourStrong@Passw0rd
+    networks:
+      - docker-dotnet-reactjs
+    volumes:
+      - ./Database:/var/lib/postgresql/data
+
+  web:
+    build: 
+      context: ./App
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - docker-dotnet-reactjs
+
+networks:
+  docker-dotnet-reactjs:
+    driver: bridge

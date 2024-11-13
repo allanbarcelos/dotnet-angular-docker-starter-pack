@@ -1,0 +1,25 @@
+@api = http://localhost:5262
+
+### Test the Root Endpoint
+GET {{api}}/api
+Accept: application/json
+
+###
+# @name login
+POST  {{api}}/api/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "Email" : "admin@mail.com",
+    "Password" : "AdminPassword123!"
+}
+
+###
+
+@authToken = {{ login.response.body.token }}
+
+###
+# @name users
+GET {{api}}/api/user HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{ authToken }}

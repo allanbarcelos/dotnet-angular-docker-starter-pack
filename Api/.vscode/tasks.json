@@ -1,0 +1,89 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "run-migrations",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "ef",
+                "database",
+                "update",
+                "--project",
+                "${workspaceFolder}/Api.csproj",
+                "--startup-project",
+                "${workspaceFolder}/Api.csproj"
+            ],
+            "problemMatcher": "$msCompile",
+            "options": {
+                "env": {
+                    "ASPNETCORE_ENVIRONMENT": "Development",
+                    "ConnectionStrings__DefaultConnection": "Host=127.0.0.1;Database=DevDB;Username=postgres;Password=YourStrong@Passw0rd;Port=5432",
+                    "JwtSettings__Key": "VPURxn6oujAe7wDfqKQ4bG1VWGF9bcLwoDKGUX",
+                    "JwtSettings__Issuer": "Api",
+                    "JwtSettings__Audience": "ApiUsers",
+                    "JwtSettings__ExpirationMinutes": "30"
+                }
+            }
+        },
+        {
+            "label": "build",
+            "dependsOn": [
+                "run-migrations"
+            ],
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Api.generated.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "type": "docker-build",
+            "label": "docker-build: debug",
+            "dependsOn": [
+                "build"
+            ],
+            "dockerBuild": {
+                "tag": "docker-dotnet-reactjs:dev",
+                "dockerfile": "${workspaceFolder}/Dockerfile",
+                "context": "${workspaceFolder}",
+                "pull": true,
+            },
+            "netCore": {
+                "appProject": "${workspaceFolder}/Api.csproj",
+            }
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: debug",
+            "dependsOn": [
+                "docker-build: debug"
+            ],
+            "dockerRun": {
+                "env": {
+                    "ASPNETCORE_ENVIRONMENT": "Development",
+                    "ConnectionStrings__DefaultConnection": "Host=DevInstancePostgres;Database=DevDB;Username=postgres;Password=YourStrong@Passw0rd;Port=5432",
+                    "JwtSettings__Key": "VPURxn6oujAe7wDfqKQ4bG1VWGF9bcLwoDKGUX",
+                    "JwtSettings__Issuer": "Api",
+                    "JwtSettings__Audience": "ApiUsers",
+                    "JwtSettings__ExpirationMinutes": "30"
+                },
+                "network": "docker-dotnet-reactjs-dev",
+                "ports": [
+                    {
+                        "containerPort": 5262,
+                        "hostPort": 5262
+                    }
+                ],
+            },
+            "netCore": {
+                "appProject": "${workspaceFolder}/Api.csproj",
+                "enableDebugging": true
+            }
+        }
+    ]
+}
