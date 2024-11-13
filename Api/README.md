@@ -67,15 +67,25 @@ docker run --rm -v $(pwd):/app -w /app mcr.microsoft.com/dotnet/sdk:8.0 dotnet a
 
 ## Example: Executing a migration
 
+### For Unix Like
 ```shell
 docker run --rm -v $(pwd):/app -w /app mcr.microsoft.com/dotnet/sdk:8.0 \
     bash -c "dotnet tool install --global dotnet-ef && \
     export PATH=\"$PATH:/root/.dotnet/tools\" && \
-    dotnet ef migrations add FirstMigration"
+    dotnet ef migrations add Migration_Name"
+```
+
+### For Windows
+```shell
+docker run --rm -v ${PWD}:/app -w /app mcr.microsoft.com/dotnet/sdk:8.0 `
+    bash -c "dotnet tool install --global dotnet-ef &&`
+    export PATH=`$PATH:/root/.dotnet/tools && `
+    dotnet ef migrations add Migration_Name"
 ```
 
 ## Example: Executing Database Update
 
+### For Unix Like
 ```shell
 docker run --rm -v $(pwd):/app -w /app \
     --network docker-dotnet-reactjs-dev \
@@ -84,5 +94,17 @@ docker run --rm -v $(pwd):/app -w /app \
     mcr.microsoft.com/dotnet/sdk:8.0 \
     bash -c "dotnet tool install --global dotnet-ef && \
     export PATH=\"\$PATH:/root/.dotnet/tools\" && \
+    dotnet ef database update"
+```
+
+### For Windows
+```powershell
+docker run --rm -v "${PWD}:/app" -w /app `
+    --network docker-dotnet-reactjs-dev `
+    -e ASPNETCORE_ENVIRONMENT=Development `
+    -e "ConnectionStrings__DefaultConnection=Host=DevInstancePostgres;Database=DevDB;Username=postgres;Password=YourStrong@Passw0rd;Port=5432" `
+    mcr.microsoft.com/dotnet/sdk:8.0 `
+    bash -c "dotnet tool install --global dotnet-ef && `
+    export PATH=`$PATH:/root/.dotnet/tools && `
     dotnet ef database update"
 ```
